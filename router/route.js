@@ -1,5 +1,5 @@
 const routes = require("express").Router();
-const authUser = require("../middleware/auth");
+const {authUser} = require("../middleware/auth");
 const authRole=require("../middleware/role");
 const {
   getAllProducts,
@@ -9,8 +9,8 @@ const {
   deleteProduct,
 } = require("../controller/product");
 
-routes.get("/", authUser,authRole,getAllProducts);
-routes.post("/new", createProduct);
+routes.get("/", authUser,getAllProducts);
+routes.post("/new",authUser,authRole,createProduct);
 routes.get("/:id", getProduct);
 routes.put("/:id", updateProduct);
 routes.delete("/:id", deleteProduct);

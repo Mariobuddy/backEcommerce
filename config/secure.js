@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 
-const {PORT,SECURE,TOKEN}=process.env;
+const {PORT,SECURE,TOKEN,EMAIL_USERNAME,EMAIL_HOST,EMAIL_PORT,EMAIL_PASSWORD}=process.env;
 
 
-module.exports={PORT,SECURE,TOKEN}
+module.exports={PORT,SECURE,TOKEN,EMAIL_HOST,EMAIL_PASSWORD,EMAIL_PORT,EMAIL_USERNAME}

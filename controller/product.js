@@ -3,6 +3,7 @@ const customError = require("../utils/errorHandler");
 const mongoose = require("mongoose");
 
 const createProduct = async (req, res, next) => {
+  req.body.user = req.user._id;
   try {
     let product = await productModel.create(req.body);
     console.log("Product created");
@@ -103,14 +104,14 @@ const getAllProducts = async (req, res, next) => {
     }
 
     if (req.query.sortBy) {
-      console.log(req.query.sortBy)
+      console.log(req.query.sortBy);
       const sortFields = req.query.sortBy.split(",");
       query.sort(sortFields.join(" "));
     }
 
     if (req.query.select) {
       const selectFields = req.query.select.split(",");
-      query.select(selectFields.join(" "))
+      query.select(selectFields.join(" "));
     }
 
     const items = await query;

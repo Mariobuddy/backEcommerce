@@ -18,6 +18,7 @@ app.use(cors({
 app.use("/api/products", routes);
 app.use(routes1);
 
+
 app.use((error, req, res, next) => {
   error.statusCode = error.statusCode || 500;
   error.status = error.status || "error";

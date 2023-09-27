@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { TOKEN } = require("../config/secure");
 const customError = require("../utils/errorHandler");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -15,8 +16,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    enum: ['user', 'admin'],
-    default:"user"
+    enum: ["user", "admin"],
+    default: "user",
   },
   image: {
     type: String,
@@ -44,12 +45,12 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    minLength: 6,
+    minLength: [6,"Password is to short"],
     required: true,
   },
   cpassword: {
     type: String,
-    minLength: 6,
+    minLength: [6,"Password is to short"],
     required: true,
   },
 
@@ -66,6 +67,8 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
+  passwordResetToken: String,
+  passwordResetTokenExpires: Date,
 });
 
 userSchema.pre("save", async function (next) {
@@ -82,18 +85,23 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.generateAuthToken = async function () {
-  try {
-    const token = jwt.sign({ _id: this._id }, TOKEN, {
-      expiresIn: "1d",
-    });
+  const token = jwt.sign({ _id: this._id }, TOKEN, {
+    expiresIn: "1d",
+  });
+  this.Tokens.push({ token });
+  await this.save();
+  return token;
+};
 
-    this.Tokens.push({ token }); // Use push to add the token to the Tokens array
-    await this.save();
-
-    return token;
-  } catch (error) {
-    return next(new customError("Internal server error", 500, "error"));
-  }
+userSchema.methods.generateResetToken = async function () {
+  let Token = crypto.randomBytes(32).toString("hex");
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(Token)
+    .digest("hex");
+  this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000;
+  await this.save();
+  return Token;
 };
 
 const userModel = new mongoose.model("userDetail", userSchema);
