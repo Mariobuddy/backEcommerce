@@ -4,6 +4,10 @@ const mongoose = require("mongoose");
 const userModel=require("../database/schema");
 
 const createProduct = async (req, res, next) => {
+  const {name,price,category,description,images}=req.body;
+  if(!name || !price || !category || !description || !images){
+    return next(new customError("All Field are required",422,"fail"))
+  }
   req.body.user = req.user._id;
   try {
     let product = await productModel.create(req.body);
