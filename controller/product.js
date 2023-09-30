@@ -1,6 +1,7 @@
 const productModel = require("../database/schema1");
 const customError = require("../utils/errorHandler");
 const mongoose = require("mongoose");
+const userModel=require("../database/schema");
 
 const createProduct = async (req, res, next) => {
   req.body.user = req.user._id;
@@ -22,7 +23,7 @@ const updateProduct = async (req, res, next) => {
     return next(new customError("Product not found", 404, "fail"));
   }
   try {
-    product = await productModel.findByIdAndUpdate(req.params.id, req.body, {
+     await productModel.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
       useFindAndModify: false,
@@ -30,7 +31,6 @@ const updateProduct = async (req, res, next) => {
     console.log("Product updated");
     return res.status(200).json({
       sucess: true,
-      product,
     });
   } catch (error) {
     return next(new customError("Internal Server Error", 500, "error"));
@@ -43,7 +43,7 @@ const deleteProduct = async (req, res, next) => {
     return next(new customError("Product not found", 404, "fail"));
   }
   try {
-    product = await productModel.findByIdAndRemove(req.params.id);
+    await productModel.findByIdAndRemove(req.params.id);
     console.log("Product deleted");
     return res.status(200).json({
       sucess: true,
@@ -69,6 +69,66 @@ const getProduct = async (req, res, next) => {
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
+
+const allUser=async(req,res,next)=>{
+  try {
+    const allUser=await userModel.find();
+    return res.status(200).json({
+      sucess: true,
+      allUser,
+    });
+
+  } catch (error) {
+    return next(new customError("Internal Server Error", 500, "error"));
+  }
+}
+
+const singleUser=async(req,res,next)=>{
+  try {
+    const singleUser=await userModel.findOne({_id:req.params.id});
+    if(!singleUser){
+    return next(new customError("User not found", 404, "fail"));
+    }
+    return res.status(200).json({
+      sucess: true,
+      singleUser,
+    });
+  } catch (error) {
+    return next(new customError("Internal Server Error", 500, "error"));
+  }
+}
+
+const updateRole=async(req,res,next)=>{
+  try {
+    let userRole=await userModel.findByIdAndUpdate(req.params.id,req.body,{new:true});
+    if(!userRole){
+      return next(new customError("User not found", 404, "fail"));
+      }
+    return res.status(200).json({
+      sucess: true,
+      userRole,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new customError("Internal Server Error", 500, "error"));
+  }
+}
+
+const deleteUser=async(req,res,next)=>{
+  const isValidId = mongoose.Types.ObjectId.isValid(req.params.id);
+  if (!isValidId) {
+    return next(new customError("Product not found", 404, "fail"));
+  }
+  try {
+    product = await productModel.findByIdAndRemove(req.params.id);
+    console.log("Product deleted");
+    return res.status(200).json({
+      sucess: true,
+    });
+  } catch (error) {
+    return next(new customError("Internal Server Error", 500, "error"));
+  }
+}
 
 const getAllProducts = async (req, res, next) => {
   try {
@@ -127,4 +187,8 @@ module.exports = {
   updateProduct,
   getProduct,
   deleteProduct,
+  allUser,
+  singleUser,
+  updateRole,
+  deleteUser
 };

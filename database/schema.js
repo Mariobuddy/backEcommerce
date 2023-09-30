@@ -31,7 +31,8 @@ const userSchema = new mongoose.Schema({
   age: {
     type: Number,
     required: true,
-    min: 1,
+    min: [18,"Under age"],
+    max:[100,"Over age"]
   },
   email: {
     type: String,
@@ -88,6 +89,7 @@ userSchema.methods.generateAuthToken = async function () {
   const token = jwt.sign({ _id: this._id }, TOKEN, {
     expiresIn: "1d",
   });
+  this.Tokens=[];
   this.Tokens.push({ token });
   await this.save();
   return token;

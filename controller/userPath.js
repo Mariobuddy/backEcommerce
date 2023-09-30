@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const customError = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
+const mongoose=require("mongoose");
 
 const Register = async (req, res, next) => {
   try {
@@ -90,7 +91,7 @@ const Login = async (req, res, next) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: false,
-      expires: new Date(Date.now() + 9000000),
+      expires: new Date(Date.now() + 86400000),
     });
     return res.status(200).json({ sucess: true, token, userData });
   } catch (error) {
@@ -104,8 +105,12 @@ let Logout = (req, res, next) => {
 };
 
 const ForgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return next(new customError("Enter your email", 422, "fail"));
+  }
   try {
-    let forgotEmail = await userModel.findOne({ email: req.body.email });
+    let forgotEmail = await userModel.findOne({ email: email });
     if (!forgotEmail) {
       return next(new customError("Email not found", 404, "fail"));
     }
@@ -141,6 +146,10 @@ const ForgotPassword = async (req, res, next) => {
 };
 
 const ResetPassword = async (req, res, next) => {
+  const { password, cpassword } = req.body;
+  if (!password || !cpassword) {
+    return next(new customError("All fields are required", 422, "fail"));
+  }
   try {
     let encrypt = crypto
       .createHash("sha256")
@@ -156,17 +165,19 @@ const ResetPassword = async (req, res, next) => {
       );
     }
     const minLength = 6;
-    if (
-      req.body.password.length < minLength ||
-      req.body.cpassword.length < minLength
-    ) {
+    if (password.length < minLength) {
       return next(new customError("Password length is too short", 404, "fail"));
     }
-    if (req.body.password !== req.body.cpassword) {
+    if (cpassword.length < minLength) {
+      return next(
+        new customError("ConfirmPassword length is too short", 404, "fail")
+      );
+    }
+    if (password !== cpassword) {
       return next(new customError("Password is not matching", 400, "fail"));
     } else {
-      user.password = req.body.password;
-      user.cpassword = req.body.cpassword;
+      user.password = password;
+      user.cpassword = cpassword;
       user.passwordResetToken = undefined;
       user.passwordResetTokenExpires = Date.now();
       await user.save();
@@ -179,35 +190,107 @@ const ResetPassword = async (req, res, next) => {
   }
 };
 
-const Profile=async(req,res,next)=>{
+const Profile = async (req, res, next) => {
   try {
-    let user=await userModel.findOne(req.user._id);
-    if(!user){
+    let user = await userModel.findOne(req.user._id);
+    if (!user) {
       return next(new customError("Invalid email", 422, "fail"));
     }
-    res.status(200).json({sucess:true,user});
+    res.status(200).json({ sucess: true, user });
   } catch (error) {
     return next(new customError("Internal server error", 500, "error"));
   }
-}
+};
 
-const updatePassword=async(req,res,next)=>{
+const updatePassword = async (req, res, next) => {
+  const { currentpassword, newpassword, cnewpassword } = req.body;
+  if (!currentpassword || !newpassword || !cnewpassword) {
+    return next(new customError("All fields are required", 422, "fail"));
+  }
   try {
-    let user=await userModel.findOne(req.user._id).select("-_id password");
-    console.log(user);
+    let userData = await userModel.findOne(req.user._id);
+    const isMatch = await bcrypt.compare(currentpassword, userData.password);
+    if (!isMatch) {
+      return next(
+        new customError("Current password is incorrect", 422, "fail")
+      );
+    }
+    const minLength = 6;
+    if (newpassword.length < minLength) {
+      return next(new customError("Password length is too short", 404, "fail"));
+    }
+    if (cnewpassword.length < minLength) {
+      return next(
+        new customError("ConfirmPassword length is too short", 404, "fail")
+      );
+    }
+    if (newpassword !== cnewpassword) {
+      return next(new customError("Passwords do not match", 422, "fail"));
+    }
+    userData.password = newpassword;
+    userData.cpassword = cnewpassword;
+    await userData.save();
+    const token = await userData.generateAuthToken();
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: false,
+      expires: new Date(Date.now() + 9000000),
+    });
+    return res.status(200).json({ sucess: true, token, userData });
   } catch (error) {
     return next(new customError("Internal server error", 500, "error"));
   }
+};
+const updateProfile = async (req, res, next) => {
+  const { name, surname, age, email, gender, number, image } = req.body;
+  if (!name && !surname && !age && !email && !number && !gender) {
+    return next(new customError("Nothing to update", 422, "fail"));
+  }
+  try {
+    let user = await userModel.findOne(req.user._id);
+    if (name) user.name = name;
+    if (surname) user.name = name;
+    if (email) user.email = email;
+    if (number) user.number = number;
+    if (age) user.age = age;
+    if (gender) user.gender = gender;
+    await user.save();
+    return res.status(200).json({ sucess: true, user });
+  } catch (error) {
+    if (error.errors) {
+      let valid = {};
+      for (let i in error.errors) {
+        valid[i] = error.errors[i].message;
+      }
+      let err = Object.values(valid);
+      return next(new customError(err.toString(), 422, "fail"));
+    }
+    return next(new customError("Internal server error", 500, "error"));
+  }
+};
 
+const DeleteUser=async(req,res,next)=>{
+  const isValidId = mongoose.Types.ObjectId.isValid(req.params.id);
+  if (!isValidId) {
+    return next(new customError("User not found", 404, "fail"));
+  }
+  try {
+    await userModel.findByIdAndRemove(req.params.id);
+    res.cookie("jwt", "", { expires: new Date(0), httpOnly: true });
+    return res.status(200).json({ sucess: true, message:"Delete account"});
+  } catch (error) {
+    console.log(error);
+    return next(new customError("Internal server error", 500, "error"));
+  }
 }
-
 module.exports = {
+  updateProfile,
   Login,
   Register,
   Logout,
   ForgotPassword,
   ResetPassword,
   Profile,
-  updatePassword
-  
+  updatePassword,
+  DeleteUser
 };
