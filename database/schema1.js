@@ -6,6 +6,11 @@ const productSchema = new mongoose.Schema({
     required: [true, "Please enter product name"],
     trim: true,
   },
+  brand: {
+    type: String,
+    required: [true, "Please enter brand name"],
+    trim: true,
+  },
 
   price: {
     type: Number,
@@ -64,16 +69,21 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      user:{
+        type:mongoose.Schema.ObjectId,
+        ref:"userDetail",
+        required:true,
+      }
     },
   ],
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: Date.now(),
   },
   user:{
     type:mongoose.Schema.ObjectId,
-    ref:"User",
-    // required:true,
+    ref:"userDetail",
+    required:true,
   }
 });
 

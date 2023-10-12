@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const customError = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
-const mongoose=require("mongoose");
 
 const Register = async (req, res, next) => {
   try {
@@ -60,6 +59,14 @@ const Register = async (req, res, next) => {
       .status(200)
       .json({ sucess: true, message: "Registration sucessfull" });
   } catch (error) {
+    if (error.errors) {
+      let valid = {};
+      for (let i in error.errors) {
+        valid[i] = error.errors[i].message;
+      }
+      let err = Object.values(valid);
+      return next(new customError(err.toString(), 422, "fail"));
+    }
     return next(new customError("Internal server error", 500, "error"));
   }
 };
@@ -181,9 +188,7 @@ const ResetPassword = async (req, res, next) => {
       user.passwordResetToken = undefined;
       user.passwordResetTokenExpires = Date.now();
       await user.save();
-      return res
-        .status(200)
-        .json({ sucess: true, message: "Password updated sucessfully" });
+      return res.status(200).json({ sucess: true, user });
     }
   } catch (error) {
     return next(new customError("Internal server error", 500, "error"));
@@ -198,6 +203,7 @@ const Profile = async (req, res, next) => {
     }
     res.status(200).json({ sucess: true, user });
   } catch (error) {
+    console.log(error);
     return next(new customError("Internal server error", 500, "error"));
   }
 };
@@ -234,7 +240,7 @@ const updatePassword = async (req, res, next) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: false,
-      expires: new Date(Date.now() + 9000000),
+      expires: new Date(Date.now() + 86000000),
     });
     return res.status(200).json({ sucess: true, token, userData });
   } catch (error) {
@@ -247,14 +253,10 @@ const updateProfile = async (req, res, next) => {
     return next(new customError("Nothing to update", 422, "fail"));
   }
   try {
-    let user = await userModel.findOne(req.user._id);
-    if (name) user.name = name;
-    if (surname) user.name = name;
-    if (email) user.email = email;
-    if (number) user.number = number;
-    if (age) user.age = age;
-    if (gender) user.gender = gender;
-    await user.save();
+    let user = await userModel.findByIdAndUpdate(req.user._id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     return res.status(200).json({ sucess: true, user });
   } catch (error) {
     if (error.errors) {
@@ -269,20 +271,15 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-const DeleteUser=async(req,res,next)=>{
-  const isValidId = mongoose.Types.ObjectId.isValid(req.params.id);
-  if (!isValidId) {
-    return next(new customError("User not found", 404, "fail"));
-  }
+const DeleteUser = async (req, res, next) => {
   try {
-    await userModel.findByIdAndRemove(req.params.id);
+    await userModel.findByIdAndRemove(req.user._id);
     res.cookie("jwt", "", { expires: new Date(0), httpOnly: true });
-    return res.status(200).json({ sucess: true, message:"Delete account"});
+    return res.status(200).json({ sucess: true, message: "Delete account" });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal server error", 500, "error"));
   }
-}
+};
 module.exports = {
   updateProfile,
   Login,
@@ -292,5 +289,5 @@ module.exports = {
   ResetPassword,
   Profile,
   updatePassword,
-  DeleteUser
+  DeleteUser,
 };

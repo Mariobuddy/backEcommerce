@@ -1,6 +1,6 @@
 const routes = require("express").Router();
-const {authUser} = require("../middleware/auth");
-const authRole=require("../middleware/role");
+const { authUser } = require("../middleware/auth");
+const authRole = require("../middleware/role");
 const {
   getAllProducts,
   createProduct,
@@ -10,18 +10,22 @@ const {
   allUser,
   singleUser,
   updateRole,
-  deleteUser
+  deleteUser,
+  createReviews,
+  getReviews,
+  deleteReview
 } = require("../controller/product");
 
-routes.get("/",getAllProducts);
-routes.get("/:id", getProduct);
-routes.post("/admin/new",authUser,authRole,createProduct);
-routes.put("/admin/updateproduct/:id",authUser, authRole,updateProduct);
-routes.delete("/admin/:id",authRole, deleteProduct);
-routes.get("/admin/alluser",allUser);
-routes.get("/admin/singleuser/:id",singleUser);
-routes.patch("/admin/updaterole/:id",authUser,authRole,updateRole);
-routes.delete("/admin/deleteuser/:id",authUser,authRole,deleteUser);
-
-
+routes.get("/products", getAllProducts);
+routes.get("/products/:id", getProduct);
+routes.post("/products/admin/new", authUser, authRole, createProduct);
+routes.patch("/products/admin/updateproduct/:id", authUser, authRole, updateProduct);
+routes.delete("/products/admin/:id", authUser, authRole, deleteProduct);
+routes.get("/products/admin/alluser", authUser, authRole, allUser);
+routes.get("/products/admin/singleuser/:id", authUser, authRole, singleUser);
+routes.patch("/products/admin/updaterole/:id", authUser, authRole, updateRole);
+routes.delete("/products/admin/deleteuser/:id", authUser, authRole, deleteUser);
+routes.patch("/products/reviews", authUser, createReviews);
+routes.get("/products/getreview", authUser, getReviews);
+routes.delete("/products/deletereview", authUser, deleteReview);
 module.exports = routes;

@@ -20,6 +20,6 @@ routes1.patch("/reset/:token", ResetPassword);
 routes1.get("/profile", authUser, Profile);
 routes1.patch("/update", authUser, updatePassword);
 routes1.patch("/updateprofile", authUser, updateProfile);
-routes1.delete("/deleteprofile/:id", DeleteUser);
+routes1.delete("/deleteprofile",authUser, DeleteUser);
 
 module.exports = routes1;
