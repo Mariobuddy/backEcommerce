@@ -82,7 +82,6 @@ const getProduct = async (req, res, next) => {
       product,
     });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
@@ -207,62 +206,69 @@ const createReviews = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
-    const totalProducts = await productModel.countDocuments();
     let page = Number(Math.floor(req.query.page)) || 1;
     let limit = Number(Math.floor(req.query.limit)) || 8;
     let skip = (page - 1) * limit;
     const query = productModel.find();
-    query.skip(skip).limit(limit);
 
-    if (req.query.company) {
-      query.where("company").equals(req.query.company);
-    }
+    let filters = {};
 
-    if (req.query.minStar && req.query.maxStar) {
-      query.where("rating").gte(req.query.minStar).lte(req.query.maxStar);
-    }
-
-    if (req.query.maxPrice && req.query.minPrice) {
-      const minPrice = parseFloat(req.query.minPrice);
-      const maxPrice = parseFloat(req.query.maxPrice);
-      if (isNaN(minPrice) || isNaN(maxPrice)) {
-        return next(new customError("Invalid price range", 422, "fail"));
+    if (req.query.minStar || req.query.maxStar) {
+      const {minStar,maxStar}=req.query
+      if (minStar && maxStar) {
+        filters.rating = { $gte: parseInt(minStar), $lte: parseInt(maxStar) };
+      } else if (minStar) {
+        filters.rating = { $gte: parseInt(minStar) };
+      } else if (maxStar) {
+        filters.rating = { $lte: parseInt(maxStar) };
       }
+    }
 
-      query.where("price").gte(minPrice).lte(maxPrice);
+    if (req.query.maxPrice || req.query.minPrice) {
+      const {minPrice,maxPrice}=req.query
+      if (minPrice && maxPrice) {
+        filters.price = { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) };
+      } else if (minPrice) {
+        filters.price = { $gte: parseInt(minPrice) };
+      } else if (maxPrice) {
+        filters.price = { $lte: parseInt(maxPrice) };
+      }
     }
 
     if (req.query.category) {
-      query.where("category").equals(req.query.category);
+      filters.category = req.query.category;
     }
 
     if (req.query.brand) {
-      query.where("brand").equals(req.query.brand);
+      filters.brand = req.query.brand;
     }
 
     if (req.query.name) {
-      query.where("name").regex(new RegExp(req.query.name, "i"));
+      filters.name = new RegExp(req.query.name, "i");
     }
 
+    let sort = "";
     if (req.query.sortBy) {
-      const sortFields = req.query.sortBy.split(",");
-      query.sort(sortFields.join(" "));
+      sort = req.query.sortBy;
     }
 
+    let select = "";
     if (req.query.select) {
-      const selectFields = req.query.select.split(",");
-      query.select(selectFields.join(" "));
+      select = req.query.select.split(",").join("");
     }
-
-    const items = await query;
+    const items = await query
+      .find(filters)
+      .select(select)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+    const totalProducts = await productModel.countDocuments(filters);
     return res.json({
       nbhits: totalProducts,
       items,
-      currentPageLength: items.length,
       resultPerPage: limit,
     });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
@@ -303,7 +309,6 @@ const deleteReview = async (req, res, next) => {
       product,
     });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
