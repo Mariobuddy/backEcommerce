@@ -207,14 +207,14 @@ const createReviews = async (req, res, next) => {
 const getAllProducts = async (req, res, next) => {
   try {
     let page = Number(Math.floor(req.query.page)) || 1;
-    let limit = Number(Math.floor(req.query.limit)) || 8;
+    let limit = Number(Math.floor(req.query.limit)) || 10;
     let skip = (page - 1) * limit;
     const query = productModel.find();
 
     let filters = {};
 
     if (req.query.minStar || req.query.maxStar) {
-      const {minStar,maxStar}=req.query
+      const { minStar, maxStar } = req.query;
       if (minStar && maxStar) {
         filters.rating = { $gte: parseInt(minStar), $lte: parseInt(maxStar) };
       } else if (minStar) {
@@ -225,7 +225,7 @@ const getAllProducts = async (req, res, next) => {
     }
 
     if (req.query.maxPrice || req.query.minPrice) {
-      const {minPrice,maxPrice}=req.query
+      const { minPrice, maxPrice } = req.query;
       if (minPrice && maxPrice) {
         filters.price = { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) };
       } else if (minPrice) {

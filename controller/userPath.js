@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const customError = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
+const cloudinary = require("cloudinary");
 
 const Register = async (req, res, next) => {
   try {
@@ -17,6 +18,12 @@ const Register = async (req, res, next) => {
       number,
       image,
     } = req.body;
+
+    const myCloud = await cloudinary.v2.uploader.upload(image, {
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
 
     if (
       !name ||
@@ -51,7 +58,10 @@ const Register = async (req, res, next) => {
       number,
       email,
       gender,
-      image,
+      image: {
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
+      },
     });
 
     await userData.save();

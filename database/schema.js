@@ -19,10 +19,18 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user",
   },
-  image: {
-    type: String,
-    required: true,
-  },
+  image: 
+    {
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
+    },
+  
   surname: {
     type: String,
     required: true,
