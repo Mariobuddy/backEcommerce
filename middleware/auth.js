@@ -13,7 +13,6 @@ const authUser = async (req, res, next) => {
     req.user=await userModel.findById(sign._id);
     next();
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal server error", 500, "error"));
   }
 };
