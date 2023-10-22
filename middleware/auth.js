@@ -11,6 +11,7 @@ const authUser = async (req, res, next) => {
   try {
     let sign = jwt.verify(token, TOKEN);
     req.user=await userModel.findById(sign._id);
+    req.token=token;
     next();
   } catch (error) {
     return next(new customError("Internal server error", 500, "error"));

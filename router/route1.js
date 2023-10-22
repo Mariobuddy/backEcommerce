@@ -14,7 +14,7 @@ const {
 
 routes1.post("/register", Register);
 routes1.post("/login", Login);
-routes1.get("/logout", Logout);
+routes1.get("/logout", authUser,Logout);
 routes1.post("/forgot", ForgotPassword);
 routes1.patch("/reset/:token", ResetPassword);
 routes1.get("/profile", authUser, Profile);

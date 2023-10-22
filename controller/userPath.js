@@ -108,7 +108,7 @@ const Login = async (req, res, next) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: false,
-      expires: new Date(Date.now() + 86400000),
+      // expires: new Date(Date.now() + 86400000),
     });
     return res.status(200).json({ sucess: true, token, userData });
   } catch (error) {
@@ -116,9 +116,14 @@ const Login = async (req, res, next) => {
   }
 };
 
-let Logout = (req, res, next) => {
-  res.cookie("jwt", "", { expires: new Date(0), httpOnly: true });
-  res.status(200).json({ sucess: true, message: "Logout" });
+let Logout = async(req, res, next) => {
+  try {
+    res.clearCookie("jwt");
+    await req.user.save();
+    res.status(200).json({ sucess: true, message: "Logout" });
+  } catch (error) {
+    return next(new customError("Internal server error", 500, "error"));
+  }
 };
 
 const ForgotPassword = async (req, res, next) => {
