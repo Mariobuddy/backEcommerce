@@ -106,17 +106,17 @@ const Login = async (req, res, next) => {
     const token = await userData.generateAuthToken();
 
     res.cookie("jwt", token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: false,
-      // expires: new Date(Date.now() + 86400000),
+      expires: new Date(Date.now() + 86400000),
     });
-    return res.status(200).json({ sucess: true, token, userData });
+    return res.status(200).json({ sucess: true, token });
   } catch (error) {
     return next(new customError("Internal server error", 500, "error"));
   }
 };
 
-let Logout = async(req, res, next) => {
+let Logout = async (req, res, next) => {
   try {
     res.clearCookie("jwt");
     await req.user.save();
