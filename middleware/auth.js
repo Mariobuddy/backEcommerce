@@ -5,7 +5,6 @@ const customError = require("../utils/errorHandler");
 
 const authUser = async (req, res, next) => {
   const token =req.cookies.jwt;
-  // let fToken=req.headers.authorization;
   if (!token) {
     return next(new customError("Please login", 422, "fail"));
   }
