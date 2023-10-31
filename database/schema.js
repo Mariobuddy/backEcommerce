@@ -19,18 +19,17 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user",
   },
-  image: 
-    {
-      public_id: {
-        type: String,
-        required: true,
-      },
-      url: {
-        type: String,
-        required: true,
-      },
+  image: {
+    public_id: {
+      type: String,
+      required: true,
     },
-  
+    url: {
+      type: String,
+      required: true,
+    },
+  },
+
   surname: {
     type: String,
     required: true,
@@ -39,8 +38,8 @@ const userSchema = new mongoose.Schema({
   age: {
     type: Number,
     required: true,
-    min: [18,"Under age"],
-    max:[100,"Over age"]
+    min: [18, "Under age"],
+    max: [100, "Over age"],
   },
   email: {
     type: String,
@@ -54,12 +53,12 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    minLength: [6,"Password is to short"],
+    minLength: [6, "Password is to short"],
     required: true,
   },
   cpassword: {
     type: String,
-    minLength: [6,"Password is to short"],
+    minLength: [6, "Password is to short"],
     required: true,
   },
 
@@ -76,9 +75,13 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
-  number:{
-    type:Number,
-    required:true,
+  number: {
+    type: Number,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
   passwordResetToken: String,
   passwordResetTokenExpires: Date,
@@ -101,7 +104,7 @@ userSchema.methods.generateAuthToken = async function () {
   const token = jwt.sign({ _id: this._id }, TOKEN, {
     expiresIn: "1d",
   });
-  this.Tokens=[];
+  this.Tokens = [];
   this.Tokens.push({ token });
   await this.save();
   return token;

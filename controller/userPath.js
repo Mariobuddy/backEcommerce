@@ -263,10 +263,15 @@ const updatePassword = async (req, res, next) => {
   }
 };
 const updateProfile = async (req, res, next) => {
-  const { name, surname, age, email, gender, number, image } = req.body;
-  if (!name && !surname && !age && !email && !number && !gender) {
+  const { name, surname, email, gender } = req.body;
+  if (!name && !surname  && !email && !gender) {
     return next(new customError("Nothing to update", 422, "fail"));
   }
+  // const myCloud = await cloudinary.v2.uploader.upload(image, {
+  //   folder: "avatars",
+  //   width: 150,
+  //   crop: "scale",
+  // });
   try {
     let user = await userModel.findByIdAndUpdate(req.user._id, req.body, {
       new: true,
