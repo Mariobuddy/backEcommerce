@@ -263,22 +263,45 @@ const updatePassword = async (req, res, next) => {
   }
 };
 const updateProfile = async (req, res, next) => {
-  const { name, surname, email, gender } = req.body;
-  if (!name && !surname  && !email && !gender) {
+  const { name, surname, email, gender, image } = req.body;
+  if (!name && !surname && !email && !gender && !image) {
     return next(new customError("Nothing to update", 422, "fail"));
   }
-  // const myCloud = await cloudinary.v2.uploader.upload(image, {
-  //   folder: "avatars",
-  //   width: 150,
-  //   crop: "scale",
-  // });
+
+  const myCloud = await cloudinary.v2.uploader.upload(image, {
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
+  const imgUser=await userModel.findById(req.user._id);
+  if(image && imgUser.image.public_id!==myCloud.public_id){
+    let imgId=imgUser.image.public_id;
+    await cloudinary.v2.uploader.destroy(imgId);
+  }
   try {
-    let user = await userModel.findByIdAndUpdate(req.user._id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    let user = await userModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        name,
+        surname,
+        gender,
+        email,
+        image: {
+          public_id: myCloud.public_id,
+          url: myCloud.secure_url,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     return res.status(200).json({ sucess: true, user });
   } catch (error) {
+    let userData = await userModel.findOne({ email: email });
+    if (userData) {
+      return next(new customError("Email already exists", 422, "fail"));
+    }
     if (error.errors) {
       let valid = {};
       for (let i in error.errors) {
