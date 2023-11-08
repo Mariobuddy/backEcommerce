@@ -18,7 +18,7 @@ routes1.get("/logout", authUser,Logout);
 routes1.post("/forgot", ForgotPassword);
 routes1.patch("/reset/:token", ResetPassword);
 routes1.get("/profile", authUser, Profile);
-routes1.patch("/update", authUser, updatePassword);
+routes1.patch("/updatepassword", authUser, updatePassword);
 routes1.patch("/updateprofile", authUser, updateProfile);
 routes1.delete("/deleteprofile",authUser, DeleteUser);
 

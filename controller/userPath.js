@@ -108,7 +108,7 @@ const Login = async (req, res, next) => {
     res.cookie("jwt", token, {
       httpOnly: false,
       secure: false,
-      expires: new Date(Date.now() + 86400000),
+      // expires: new Date(Date.now() + 86400000),
     });
     return res.status(200).json({ sucess: true, token });
   } catch (error) {
@@ -137,7 +137,7 @@ const ForgotPassword = async (req, res, next) => {
       return next(new customError("Email not found", 404, "fail"));
     }
     let resetToken = await forgotEmail.generateResetToken();
-    let reqPath = `${req.protocol}://${req.get("host")}/reset/${resetToken}`;
+    let reqPath = `http://localhost:4000/reset/${resetToken}`;
     const message = `we have received a password reset request.Please use the below link to reset your password\n\n${reqPath}`;
     try {
       await sendEmail({
@@ -153,6 +153,7 @@ const ForgotPassword = async (req, res, next) => {
       forgotEmail.passwordResetToken = undefined;
       forgotEmail.passwordResetTokenExpires = undefined;
       await forgotEmail.save();
+      console.log(error);
       return next(
         new customError(
           "There was an error sending password request email",
@@ -162,7 +163,6 @@ const ForgotPassword = async (req, res, next) => {
       );
     }
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal server error", 500, "error"));
   }
 };
@@ -218,7 +218,6 @@ const Profile = async (req, res, next) => {
     }
     res.status(200).json({ sucess: true, user });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal server error", 500, "error"));
   }
 };
@@ -232,9 +231,7 @@ const updatePassword = async (req, res, next) => {
     let userData = await userModel.findOne(req.user._id);
     const isMatch = await bcrypt.compare(currentpassword, userData.password);
     if (!isMatch) {
-      return next(
-        new customError("Current password is incorrect", 422, "fail")
-      );
+      return next(new customError("Password is incorrect", 422, "fail"));
     }
     const minLength = 6;
     if (newpassword.length < minLength) {
@@ -273,12 +270,16 @@ const updateProfile = async (req, res, next) => {
     width: 150,
     crop: "scale",
   });
-  const imgUser=await userModel.findById(req.user._id);
-  if(image && imgUser.image.public_id!==myCloud.public_id){
-    let imgId=imgUser.image.public_id;
+  const imgUser = await userModel.findById(req.user._id);
+  if (image && imgUser.image.public_id !== myCloud.public_id) {
+    let imgId = imgUser.image.public_id;
     await cloudinary.v2.uploader.destroy(imgId);
   }
   try {
+    let userMain = await userModel.findById(req.user._id);
+    if (userMain.email !== email) {
+      return next(new customError("Email already exists", 422, "fail"));
+    }
     let user = await userModel.findByIdAndUpdate(
       req.user._id,
       {
@@ -298,18 +299,6 @@ const updateProfile = async (req, res, next) => {
     );
     return res.status(200).json({ sucess: true, user });
   } catch (error) {
-    let userData = await userModel.findOne({ email: email });
-    if (userData) {
-      return next(new customError("Email already exists", 422, "fail"));
-    }
-    if (error.errors) {
-      let valid = {};
-      for (let i in error.errors) {
-        valid[i] = error.errors[i].message;
-      }
-      let err = Object.values(valid);
-      return next(new customError(err.toString(), 422, "fail"));
-    }
     return next(new customError("Internal server error", 500, "error"));
   }
 };
