@@ -94,7 +94,7 @@ const Login = async (req, res, next) => {
     const userData = await userModel.findOne({ email: email });
 
     if (!userData) {
-      return next(new customError("Invalid email", 422, "fail"));
+      return next(new customError("Email not found", 422, "fail"));
     }
 
     const isMatch = await bcrypt.compare(password, userData.password);
@@ -108,7 +108,7 @@ const Login = async (req, res, next) => {
     res.cookie("jwt", token, {
       httpOnly: false,
       secure: false,
-      // expires: new Date(Date.now() + 86400000),
+      expires: new Date(Date.now() + 86400000),
     });
     return res.status(200).json({ sucess: true, token });
   } catch (error) {
@@ -119,7 +119,6 @@ const Login = async (req, res, next) => {
 let Logout = async (req, res, next) => {
   try {
     res.clearCookie("jwt");
-    await req.user.save();
     res.status(200).json({ sucess: true, message: "Logout" });
   } catch (error) {
     return next(new customError("Internal server error", 500, "error"));
@@ -137,7 +136,7 @@ const ForgotPassword = async (req, res, next) => {
       return next(new customError("Email not found", 404, "fail"));
     }
     let resetToken = await forgotEmail.generateResetToken();
-    let reqPath = `http://localhost:4000/reset/${resetToken}`;
+    let reqPath = `http://localhost:3000/resetpassword/${resetToken}`;
     const message = `we have received a password reset request.Please use the below link to reset your password\n\n${reqPath}`;
     try {
       await sendEmail({
@@ -148,6 +147,7 @@ const ForgotPassword = async (req, res, next) => {
       res.status(200).json({
         status: "sucess",
         message: "password reset link send to the user email",
+        token: resetToken,
       });
     } catch (error) {
       forgotEmail.passwordResetToken = undefined;
@@ -169,6 +169,7 @@ const ForgotPassword = async (req, res, next) => {
 
 const ResetPassword = async (req, res, next) => {
   const { password, cpassword } = req.body;
+  console.log(req.params);
   if (!password || !cpassword) {
     return next(new customError("All fields are required", 422, "fail"));
   }

@@ -4,11 +4,10 @@ const {EMAIL_HOST,EMAIL_PASSWORD,EMAIL_USERNAME,EMAIL_PORT}=require("../config/s
 const sendEmail=async(option)=>{
 
     const transporter=nodemailer.createTransport({
-        host:EMAIL_HOST,
-        port:EMAIL_PORT,
+        service:"gmail",
         auth:{
-            user:EMAIL_USERNAME,
-            pass:EMAIL_PASSWORD
+            user:"javascript97559755@gmail.com",
+            pass:"djouzqurelrhbocb"
         }
     });
 
