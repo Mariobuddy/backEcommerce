@@ -8,8 +8,7 @@ const connection=async(url)=>{
         useUnifiedTopology:true
     })
    } catch (error) {
-    console.log(error);
-    return;
+    return error;
    }
     
 

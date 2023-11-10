@@ -48,8 +48,7 @@ const Start = async () => {
       console.log(`Server is started on PORT ${PORT}`);
     });
   } catch (error) {
-    console.log(error);
-    return;
+    return error;
   }
 };
 

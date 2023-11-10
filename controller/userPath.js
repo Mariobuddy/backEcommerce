@@ -153,7 +153,6 @@ const ForgotPassword = async (req, res, next) => {
       forgotEmail.passwordResetToken = undefined;
       forgotEmail.passwordResetTokenExpires = undefined;
       await forgotEmail.save();
-      console.log(error);
       return next(
         new customError(
           "There was an error sending password request email",
@@ -169,7 +168,6 @@ const ForgotPassword = async (req, res, next) => {
 
 const ResetPassword = async (req, res, next) => {
   const { password, cpassword } = req.body;
-  console.log(req.params);
   if (!password || !cpassword) {
     return next(new customError("All fields are required", 422, "fail"));
   }

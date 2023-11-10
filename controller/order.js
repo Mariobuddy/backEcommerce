@@ -58,7 +58,6 @@ const allOrders = async (req, res, next) => {
       total,
     });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
@@ -120,7 +119,6 @@ const updateOrders = async (req, res, next) => {
       message: "Stock Updated",
     });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
@@ -141,7 +139,6 @@ const deleteOrder = async (req, res, next) => {
 };
 
 const updateStock = async (id, quantity) => {
-  console.log("Hello");
   let product = await productModel.findById(id);
   product.stock -= quantity;
   await product.save();
