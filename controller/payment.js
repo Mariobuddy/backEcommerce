@@ -1,4 +1,4 @@
-const { STRIPE_API_KEY, STRIPE_SECRET_KEY } = require("../config/secure");
+const { STRIPE_SECRET_KEY } = require("../config/secure");
 const customError = require("../utils/errorHandler");
 const stripe = require("stripe")(STRIPE_SECRET_KEY);
 
@@ -20,12 +20,5 @@ const paymentGateway = async (req, res, next) => {
   }
 };
 
-const getStripeKey = async (req, res, next) => {
-  try {
-    res.status(200).json({ stripe_key: STRIPE_API_KEY });
-  } catch (error) {
-    return next(new customError("Internal Server Error", 500, "error"));
-  }
-};
 
-module.exports = { paymentGateway,getStripeKey };
+module.exports = { paymentGateway };
