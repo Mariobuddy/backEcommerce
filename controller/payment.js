@@ -4,13 +4,13 @@ const stripe = require("stripe")(STRIPE_SECRET_KEY);
 
 const paymentGateway = async (req, res, next) => {
   const { amount } = req.body;
+  if (!amount) {
+    return next(new customError("Amount Not Received", 422, "error"));
+  }
   try {
-    let myPayment = await stripe.paymentIntends.create({
+    const myPayment = await stripe.paymentIntents.create({
       amount,
       currency: "inr",
-      metadata: {
-        company: "Mario Store",
-      },
     });
     res
       .status(200)
@@ -19,6 +19,5 @@ const paymentGateway = async (req, res, next) => {
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
-
 
 module.exports = { paymentGateway };

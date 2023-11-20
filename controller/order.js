@@ -13,12 +13,12 @@ const newOrder = async (req, res, next) => {
     totalPrice,
   } = req.body;
   if (
-    !shippingInfo ||
-    !orderItems ||
-    !paymentInfo ||
-    !itemPrice ||
-    !taxPrice ||
-    !shippingPrice ||
+    !shippingInfo &&
+    !orderItems &&
+    !paymentInfo &&
+    !itemPrice &&
+    !taxPrice &&
+    !shippingPrice &&
     !totalPrice
   ) {
     return next(new customError("All Field are required", 422, "fail"));
