@@ -4,7 +4,7 @@ const authRole=require("../middleware/role");
 const {newOrder,singleOrder,myOrder,allOrders,updateOrders,deleteOrder}=require("../controller/order");
 
 routes2.post("/neworder",authUser,newOrder);
-routes2.get("/admin/singleorder/:id",authUser,authRole,singleOrder);
+routes2.get("/singleorder/:id",authUser,singleOrder);
 routes2.get("/myorder",authUser,myOrder);
 routes2.get("/admin/allorder",authUser,authRole,allOrders);
 routes2.patch("/admin/updatestock/:id",authUser,authRole,updateOrders);
