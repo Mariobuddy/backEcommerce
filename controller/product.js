@@ -204,6 +204,17 @@ const createReviews = async (req, res, next) => {
   }
 };
 
+const getAdminProducts = async (req, res, next) => {
+  try {
+    const allProducts = await productModel.find();
+    return res.json({
+      allProducts,
+    });
+  } catch (error) {
+    return next(new customError("Internal Server Error", 500, "error"));
+  }
+};
+
 const getAllProducts = async (req, res, next) => {
   try {
     let page = Number(Math.floor(req.query.page)) || 1;
@@ -326,4 +337,5 @@ module.exports = {
   createReviews,
   getReviews,
   deleteReview,
+  getAdminProducts,
 };
