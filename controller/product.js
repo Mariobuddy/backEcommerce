@@ -2,14 +2,30 @@ const productModel = require("../database/schema1");
 const customError = require("../utils/errorHandler");
 const mongoose = require("mongoose");
 const userModel = require("../database/schema");
+const cloudinary = require("cloudinary");
+
 
 const createProduct = async (req, res, next) => {
-  const { name, price, category, description, images, brand } = req.body;
-  if (!name || !price || !category || !description || !images || !brand) {
+  const { name, price, category, description, images, brand,stock } = req.body;
+  if (!name || !price || !category || !description || !images || !brand || !stock) {
     return next(new customError("All Field are required", 422, "fail"));
   }
-  req.body.user = req.user._id;
   try {
+    let imageLinks=[];
+
+    for(let i=0;i<images.length;i++){
+      const myCloud = await cloudinary.v2.uploader.upload(images[i], {
+        folder: "products",
+        width: 150,
+        crop: "scale",
+      });
+      imageLinks.push({
+      public_id:myCloud.public_id,
+      url:myCloud.secure_url
+      });
+    }
+    req.body.images=imageLinks;
+    req.body.user = req.user._id;
     let product = await productModel.create(req.body);
     console.log("Product created");
     return res.status(200).json({
@@ -17,6 +33,7 @@ const createProduct = async (req, res, next) => {
       product,
     });
   } catch (error) {
+    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
