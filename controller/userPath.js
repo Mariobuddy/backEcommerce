@@ -271,8 +271,7 @@ const updateProfile = async (req, res, next) => {
   });
   const imgUser = await userModel.findById(req.user._id);
   if (image && imgUser.image.public_id !== myCloud.public_id) {
-    let imgId = imgUser.image.public_id;
-    await cloudinary.v2.uploader.destroy(imgId);
+    await cloudinary.v2.uploader.destroy(imgUser.image.public_id);
   }
   try {
     let userMain = await userModel.findById(req.user._id);

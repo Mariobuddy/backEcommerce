@@ -4,27 +4,32 @@ const mongoose = require("mongoose");
 const userModel = require("../database/schema");
 const cloudinary = require("cloudinary");
 
-
 const createProduct = async (req, res, next) => {
-  const { name, price, category, description, images, brand,stock } = req.body;
-  if (!name || !price || !category || !description || !images || !brand || !stock) {
+  const { name, price, category, description, images, brand, stock } = req.body;
+  if (
+    !name ||
+    !price ||
+    !category ||
+    !description ||
+    !images ||
+    !brand ||
+    !stock
+  ) {
     return next(new customError("All Field are required", 422, "fail"));
   }
   try {
-    let imageLinks=[];
+    let imageLinks = [];
 
-    for(let i=0;i<images.length;i++){
+    for (let i = 0; i < images.length; i++) {
       const myCloud = await cloudinary.v2.uploader.upload(images[i], {
         folder: "products",
-        width: 150,
-        crop: "scale",
       });
       imageLinks.push({
-      public_id:myCloud.public_id,
-      url:myCloud.secure_url
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
       });
     }
-    req.body.images=imageLinks;
+    req.body.images = imageLinks;
     req.body.user = req.user._id;
     let product = await productModel.create(req.body);
     console.log("Product created");
@@ -33,7 +38,6 @@ const createProduct = async (req, res, next) => {
       product,
     });
   } catch (error) {
-    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
@@ -63,19 +67,23 @@ const updateProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
-
   if (!mongoose.Types.ObjectId.isValid(productId)) {
     return next(new customError("Invalid format", 400, "fail"));
   }
   try {
-    let del = await productModel.findByIdAndRemove(productId);
-    if (!del) {
+    let product = await productModel.findById(productId);
+    if (!product) {
       return next(new customError("Product not found", 404, "fail"));
     }
+    for (let i = 0; i < product.images.length; i++) {
+      await cloudinary.v2.uploader.destroy(product.images[i].public_id);
+    }
+    await productModel.findByIdAndRemove(productId);
+
     console.log("Product deleted");
     return res.status(200).json({
       sucess: true,
-      del,
+      product,
     });
   } catch (error) {
     return next(new customError("Internal Server Error", 500, "error"));

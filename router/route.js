@@ -22,7 +22,7 @@ routes.get("/products/:id", getProduct);
 routes.post("/products/admin/new", authUser, authRole, createProduct);
 routes.get("/products/admin/allproducts", authUser, authRole, getAdminProducts);
 routes.patch("/products/admin/updateproduct/:id", authUser, authRole, updateProduct);
-routes.delete("/products/admin/:id", authUser, authRole, deleteProduct);
+routes.delete("/products/admin/deleteproduct/:id", authUser, authRole, deleteProduct);
 routes.get("/products/admin/alluser", authUser, authRole, allUser);
 routes.get("/products/admin/singleuser/:id", authUser, authRole, singleUser);
 routes.patch("/products/admin/updaterole/:id", authUser, authRole, updateRole);
