@@ -1,6 +1,5 @@
 const productModel = require("../database/schema1");
 const customError = require("../utils/errorHandler");
-const mongoose = require("mongoose");
 const userModel = require("../database/schema");
 const cloudinary = require("cloudinary");
 
@@ -44,32 +43,48 @@ const createProduct = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   const productId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return next(new customError("Invalid format", 400, "fail"));
-  }
   try {
-    let updateUser = await productModel.findByIdAndUpdate(productId, req.body, {
+    let product = await productModel.findById(productId);
+    if (!product) {
+      return next(new customError("Product not found", 404, "fail"));
+    }
+
+    if (req.body.images !== undefined && req.body.newImages.length !== 0) {
+      for (let i = 0; i < product.images.length; i++) {
+        await cloudinary.v2.uploader.destroy(product.images[i].public_id);
+      }
+      let imageLinks = [];
+      for (let i = 0; i < req.body.newImages.length; i++) {
+        const myCloud = await cloudinary.v2.uploader.upload(
+          req.body.newImages[i],
+          {
+            folder: "products",
+          }
+        );
+        imageLinks.push({
+          public_id: myCloud.public_id,
+          url: myCloud.secure_url,
+        });
+      }
+      req.body.images = imageLinks;
+    }
+    await productModel.findByIdAndUpdate(productId, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!updateUser) {
-      return next(new customError("Product not found", 404, "fail"));
-    }
     console.log("Product updated");
     return res.status(200).json({
       sucess: true,
-      updateUser,
+      product,
     });
   } catch (error) {
+    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
 
 const deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return next(new customError("Invalid format", 400, "fail"));
-  }
   try {
     let product = await productModel.findById(productId);
     if (!product) {
@@ -92,10 +107,6 @@ const deleteProduct = async (req, res, next) => {
 
 const getProduct = async (req, res, next) => {
   const productId = req.params.id;
-
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return next(new customError("Invalid format", 400, "fail"));
-  }
   try {
     let product = await productModel.findById(productId);
     if (!product) {
@@ -125,9 +136,6 @@ const allUser = async (req, res, next) => {
 
 const singleUser = async (req, res, next) => {
   const productId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return next(new customError("Invalid format", 400, "fail"));
-  }
   try {
     const singleUser = await userModel.findById(productId);
     if (!singleUser) {
@@ -144,9 +152,6 @@ const singleUser = async (req, res, next) => {
 
 const updateRole = async (req, res, next) => {
   const productId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return next(new customError("Invalid format", 400, "fail"));
-  }
   try {
     let validUser = await userModel.findByIdAndUpdate(productId, req.body, {
       new: true,
@@ -167,9 +172,6 @@ const updateRole = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
   const productId = req.params.id;
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return next(new customError("Invalid format", 400, "fail"));
-  }
   try {
     let del = await userModel.findByIdAndRemove(productId);
     if (!del) {
@@ -186,9 +188,6 @@ const deleteUser = async (req, res, next) => {
 
 const createReviews = async (req, res, next) => {
   const { rating, comment, productId } = req.body;
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return next(new customError("Invalid format", 400, "fail"));
-  }
   let reviews = {
     user: req.user._id,
     name: req.user.name,

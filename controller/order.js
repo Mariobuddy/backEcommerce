@@ -102,36 +102,24 @@ const updateOrders = async (req, res, next) => {
   try {
     let order = await orderModel.findById(req.params.id);
     if (!order) {
-      return next(new customError("order not found", 404, "fail"));
+      return next(new customError("Order not found", 404, "fail"));
     }
     if (order.orderStatus === "Delivered") {
       return next(new customError("Order already delivered", 400, "fail"));
     }
-    order.orderItems.map(async (val) => {
-      return await updateStock(val.product, val.quantity);
-    });
+    order.orderStatus = req.body.status;
 
     if (req.body.status === "Delivered") {
+      order.orderItems.map(async (val) => {
+        return await updateStock(val.product, val.quantity);
+      });
       order.deliveredAt = Date.now();
     }
+
+    await order.save({ validator: true });
     res.status(200).json({
       sucess: true,
       message: "Stock Updated",
-    });
-  } catch (error) {
-    return next(new customError("Internal Server Error", 500, "error"));
-  }
-};
-
-const deleteOrder = async (req, res, next) => {
-  try {
-    let order = await orderModel.findByIdAndRemove(req.params.id);
-    if (!order) {
-      return next(new customError("order not found", 404, "fail"));
-    }
-    res.status(200).json({
-      sucess: true,
-      message: "Order Deleted",
     });
   } catch (error) {
     return next(new customError("Internal Server Error", 500, "error"));
@@ -142,6 +130,21 @@ const updateStock = async (id, quantity) => {
   let product = await productModel.findById(id);
   product.stock -= quantity;
   await product.save();
+};
+
+const deleteOrder = async (req, res, next) => {
+  try {
+    let order = await orderModel.findByIdAndRemove(req.params.id);
+    if (!order) {
+      return next(new customError("Order not found", 404, "fail"));
+    }
+    res.status(200).json({
+      sucess: true,
+      message: "Order Deleted",
+    });
+  } catch (error) {
+    return next(new customError("Internal Server Error", 500, "error"));
+  }
 };
 
 module.exports = {
