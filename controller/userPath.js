@@ -104,12 +104,8 @@ const Login = async (req, res, next) => {
     }
 
     const token = await userData.generateAuthToken();
-    console.log("hello");
 
     res.cookie("jwt", token, {
-      httpOnly: false,
-      secure: true, // Send the cookie only over HTTPS
-      sameSite: 'None', // Allow cross-site requests
       expires: new Date(Date.now() + 86400000),
     });
     return res.status(200).json({ sucess: true, token });
