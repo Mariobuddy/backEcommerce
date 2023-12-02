@@ -107,7 +107,8 @@ const Login = async (req, res, next) => {
 
     res.cookie("jwt", token, {
       httpOnly: true,
-      secure: true,
+      secure: true, // Send the cookie only over HTTPS
+      sameSite: 'None', // Allow cross-site requests
       expires: new Date(Date.now() + 86400000),
     });
     return res.status(200).json({ sucess: true, token });
