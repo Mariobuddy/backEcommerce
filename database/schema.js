@@ -90,7 +90,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     try {
-      const saltRounds = 8;
+      const saltRounds = 10;
       this.password = await bcrypt.hash(this.password, saltRounds);
       this.cpassword = await bcrypt.hash(this.cpassword, saltRounds);
       next();
