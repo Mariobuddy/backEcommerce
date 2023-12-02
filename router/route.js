@@ -28,6 +28,6 @@ routes.get("/products/admin/singleuser/:id", authUser, authRole, singleUser);
 routes.patch("/products/admin/updaterole/:id", authUser, authRole, updateRole);
 routes.delete("/products/admin/deleteuser/:id", authUser, authRole, deleteUser);
 routes.patch("/products/reviews", authUser, createReviews);
-routes.get("/products/getreview", authUser, getReviews);
-routes.delete("/products/deletereview", authUser, deleteReview);
+routes.get("/products/admin/getreview", authUser, getReviews);
+routes.delete("/products/admin/deletereview", authUser, deleteReview);
 module.exports = routes;

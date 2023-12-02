@@ -166,6 +166,7 @@ const updateRole = async (req, res, next) => {
       validUser,
     });
   } catch (error) {
+    console.log(error);
     return next(new customError("Internal Server Error", 500, "error"));
   }
 };
@@ -173,10 +174,12 @@ const updateRole = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
   const productId = req.params.id;
   try {
-    let del = await userModel.findByIdAndRemove(productId);
+    let del = await userModel.findById(productId);
     if (!del) {
       return next(new customError("User not found", 404, "fail"));
     }
+    await cloudinary.v2.uploader.destroy(del.image.public_id);
+    await userModel.findByIdAndRemove(productId);
     return res.status(200).json({
       sucess: true,
       del,
@@ -327,11 +330,12 @@ const deleteReview = async (req, res, next) => {
   try {
     let product = await productModel.findById(req.query.productId);
 
+    if (!product) {
+      return next(new customError("Product not found", 404, "fail"));
+    }
     product.reviews = product.reviews.filter((val) => {
       return val._id.toString() !== req.query.Id;
     });
-
-    product.numOfReviews = product.reviews.length;
     let sum = product.reviews.reduce((accumulator, currentValue) => {
       return accumulator + currentValue.rating;
     }, 0);
@@ -341,7 +345,7 @@ const deleteReview = async (req, res, next) => {
     await product.save();
     res.status(200).json({
       sucess: true,
-      product,
+      review: product.reviews,
     });
   } catch (error) {
     return next(new customError("Internal Server Error", 500, "error"));
