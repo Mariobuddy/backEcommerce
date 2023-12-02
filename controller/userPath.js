@@ -1,5 +1,5 @@
 const userModel = require("../database/schema");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const customError = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
