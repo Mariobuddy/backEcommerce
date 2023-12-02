@@ -260,6 +260,7 @@ const updatePassword = async (req, res, next) => {
   }
 };
 const updateProfile = async (req, res, next) => {
+  console.log("take");
   const { name, surname, email, gender, image } = req.body;
   if (!name && !surname && !email && !gender && !image) {
     return next(new customError("Nothing to update", 422, "fail"));
@@ -298,6 +299,7 @@ const updateProfile = async (req, res, next) => {
     );
     return res.status(200).json({ sucess: true, user });
   } catch (error) {
+    console.log(error);
     return next(new customError("Internal server error", 500, "error"));
   }
 };
