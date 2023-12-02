@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcrypt");
+const bcrypt = require("../server").bcrypt;
 const jwt = require("jsonwebtoken");
 const { TOKEN } = require("../config/secure");
 const customError = require("../utils/errorHandler");
@@ -90,7 +90,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     try {
-      const saltRounds = 12;
+      const saltRounds = 8;
       this.password = await bcrypt.hash(this.password, saltRounds);
       this.cpassword = await bcrypt.hash(this.cpassword, saltRounds);
       next();

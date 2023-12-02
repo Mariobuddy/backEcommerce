@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
+const bcrypt=require("bcrypt");
 const cors = require("cors");
 const cloudinary = require("cloudinary");
 const fileUpload=require("express-fileupload");
@@ -55,3 +56,5 @@ const Start = async () => {
 };
 
 Start();
+
+module.exports.bcrypt=bcrypt;
