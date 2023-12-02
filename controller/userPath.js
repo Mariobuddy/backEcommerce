@@ -109,6 +109,7 @@ const Login = async (req, res, next) => {
       httpOnly: false,
       secure: false,
       expires: new Date(Date.now() + 86400000),
+      origin: "http://localhost:3000",
     });
     return res.status(200).json({ sucess: true, token });
   } catch (error) {
