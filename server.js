@@ -24,7 +24,7 @@ app.use(
     credentials: true,
     methods: "GET,POST,PATCH,DELETE,OPTIONS",
     optionsSuccessStatus: 200,
-    origin: "http://localhost:3000",
+    origin: "https://frontfood-mariobuddy.vercel.app",
   })
 );
 
