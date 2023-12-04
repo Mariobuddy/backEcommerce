@@ -107,8 +107,7 @@ const Login = async (req, res, next) => {
 
     res.cookie("jwt", token, {
       httpOnly: false,
-      secure: true,
-      sameSite:"none",
+      secure: false,
       expires: new Date(Date.now() + 86400000),
     });
     return res.status(200).json({ sucess: true, token });
@@ -250,9 +249,8 @@ const updatePassword = async (req, res, next) => {
     await userData.save();
     const token = await userData.generateAuthToken();
     res.cookie("jwt", token, {
-      httpOnly: false,
-      secure: true,
-      sameSite:"none",
+      httpOnly: true,
+      secure: false,
       expires: new Date(Date.now() + 86000000),
     });
     return res.status(200).json({ sucess: true, token, userData });

@@ -24,7 +24,7 @@ app.use(
     credentials: true,
     methods: "GET,POST,PATCH,DELETE,OPTIONS",
     optionsSuccessStatus: 200,
-    origin: "https://frontfood.vercel.app",
+    origin: "http://localhost:3000",
   })
 );
 
