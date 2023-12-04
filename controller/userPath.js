@@ -4,6 +4,7 @@ const customError = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
 const cloudinary = require("cloudinary");
+const base_url=require("../config/base_url");
 
 const Register = async (req, res, next) => {
   try {
@@ -136,7 +137,7 @@ const ForgotPassword = async (req, res, next) => {
       return next(new customError("Email not found", 404, "fail"));
     }
     let resetToken = await forgotEmail.generateResetToken();
-    let reqPath = `http://localhost:3000/resetpassword/${resetToken}`;
+    let reqPath = `${base_url}/resetpassword/${resetToken}`;
     const message = `we have received a password reset request.Please use the below link to reset your password\n\n${reqPath}`;
     try {
       await sendEmail({
