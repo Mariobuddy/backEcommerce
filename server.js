@@ -3,12 +3,18 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const cloudinary = require("cloudinary");
-const fileUpload=require("express-fileupload");
-const { PORT, SECURE,Cloud_Key,Cloud_Name,Cloud_Secret } = require("./config/secure");
+const fileUpload = require("express-fileupload");
+const {
+  PORT,
+  SECURE,
+  Cloud_Key,
+  Cloud_Name,
+  Cloud_Secret,
+} = require("./config/secure");
 const routes = require("./router/route");
 const routes1 = require("./router/route1");
 const routes2 = require("./router/routes2");
-const routes3=require("./router/route3");
+const routes3 = require("./router/route3");
 const connection = require("./database/connection");
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
