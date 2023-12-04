@@ -105,11 +105,11 @@ const Login = async (req, res, next) => {
 
     const token = await userData.generateAuthToken();
 
-    res.cookie("jwt", token, {
-      secure: true,
-      expires: new Date(Date.now() + 86400000),
-      sameSite:"none"
-    });
+    // res.cookie("jwt", token, {
+    //   secure: true,
+    //   expires: new Date(Date.now() + 86400000),
+    //   sameSite:"none"
+    // });
     return res.status(200).json({ sucess: true, tokens:token });
   } catch (error) {
     return next(new customError("Internal server error", 500, "error"));
