@@ -20,11 +20,7 @@ const Register = async (req, res, next) => {
       image,
     } = req.body;
 
-    const myCloud = await cloudinary.v2.uploader.upload(image, {
-      folder: "avatars",
-      width: 150,
-      crop: "scale",
-    });
+    const myCloud = await cloudinary.v2.uploader.upload(image);
 
     if (
       !name ||
@@ -267,11 +263,7 @@ const updateProfile = async (req, res, next) => {
     return next(new customError("Nothing to update", 422, "fail"));
   }
 
-  const myCloud = await cloudinary.v2.uploader.upload(image, {
-    folder: "avatars",
-    width: 150,
-    crop: "scale",
-  });
+  const myCloud = await cloudinary.v2.uploader.upload(image);
   const imgUser = await userModel.findById(req.user._id);
   if (image && imgUser.image.public_id !== myCloud.public_id) {
     await cloudinary.v2.uploader.destroy(imgUser.image.public_id);
